@@ -61,7 +61,7 @@ void bmi2_delay_us(uint32_t period, void *intf_ptr) {
 
 int main() {
     struct bmi2_dev bmi;
-    struct bmi2_sens_data sensor_data; // Fixed type name
+    struct bmi2_sens_data sensor_data;
     int8_t rslt;
 
     fd = open("/dev/i2c-3", O_RDWR);
@@ -94,10 +94,9 @@ int main() {
 
     while (1) {
         bmi2_get_sensor_data(&sensor_data, &bmi);
-        // Corrected sub-structure names (.accel and .gyro)
         fprintf(f, "%d,%d,%d,%d,%d,%d\n",
-            sensor_data.accel.x, sensor_data.accel.y, sensor_data.accel.z,
-            sensor_data.gyro.x, sensor_data.gyro.y, sensor_data.gyro.z);
+            sensor_data.acc.x, sensor_data.acc.y, sensor_data.acc.z,
+            sensor_data.gyr.x, sensor_data.gyr.y, sensor_data.gyr.z);
         fflush(f);
         usleep(10000);
     }
