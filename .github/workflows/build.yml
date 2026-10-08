@@ -1,4 +1,4 @@
-name: Build SigmaStar BMI270 Logger
+name: Build actioncam
 on: [push, workflow_dispatch]
 
 jobs:
@@ -11,12 +11,20 @@ jobs:
       - name: Install ARM Linux Cross-Compiler
         run: sudo apt-get update && sudo apt-get install -y gcc-arm-linux-gnueabihf
 
-      - name: Compile Static Binary
-        # Compiling statically ensures it works on OpenIPC regardless of uClibc/musl differences
-        run: arm-linux-gnueabihf-gcc *.c -I. -static -O2 -o bmi270_logger
+      - name: Fetch Bosch BMI270 SensorAPI
+        run: git clone --depth 1 https://github.com/boschsensortec/BMI270_SensorAPI bmi270_api
 
-      - name: Upload Binary
+      - name: Compile static binary
+        # Only the three files we need: Bosch's bmi2.c + bmi270.c and our actioncam.c.
+        # (Do NOT use *.c: the Bosch repo has several chip variants that clash.)
+        run: |
+          arm-linux-gnueabihf-gcc -O2 -static -Wall \
+            -Ibmi270_api \
+            actioncam.c bmi270_api/bmi2.c bmi270_api/bmi270.c \
+            -lpthread -lrt -o actioncam
+
+      - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
-          name: bmi270_logger_binary
-          path: bmi270_logger
+          name: actioncam_binary
+          path: actioncam
